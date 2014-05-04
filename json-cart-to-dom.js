@@ -56,9 +56,9 @@ $( document ).ready(function() {
       }
     ];
 
-
+    console.log("1");
     //cartObj.map(function (stuff) {
-     console.log(cartObj[0].stuff.order.items[0]);
+    //  console.log(cartObj[0].stuff.order.items[0]);
     //});
   }());
-}); 
+});
