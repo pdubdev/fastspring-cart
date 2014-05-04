@@ -34,7 +34,7 @@ var cartObj =
 				"summary": ""
 			},
 			"productName": "ABC Book Organizer",
-			"quantity": 1,
+			"quantity": 2,
 			"subtotal": {
 				"presentation": "$29.95",
 				"value": 29.95
@@ -76,13 +76,34 @@ $(document).ready(function(){
 	var items = cartObj.order.items;
 
 	// MODELS
-	var LineItem = Backbone.Model.extend({});
-	var LineItemList = Backbone.Collection.extend({
-		model: LineItem,
+	var LineItem = Backbone.Model.extend({
 		initialize: function() {
-			this.total = 0;
-			
+			// this.total = this.quantity * this.subtotal.value;
+			this.updateTotal();
+			this.on("change:quantity", this.updateTotal); 
+		},
+		updateTotal: function() {
+			this.total = this.quantity * this.subtotal.value;
 		}
+	});
+	var LineItemList = Backbone.Collection.extend({
+		// model: LineItem,
+		initialize: function() {
+			// this.total = this.quantity * this.subtotal.value;
+			this.updateTotal();
+			this.on("change", this.updateTotal); 
+		},
+		updateTotal: function() {
+			var total = 0;
+			this.forEach(function(item){
+				debugger;
+				var quantity = item.attributes.quantity;
+				var price = item.attributes.subtotal.value;
+				total = total + (quantity * price);
+			});
+			this.total = total;
+		}
+
 	});
 
 	// =========
@@ -91,22 +112,39 @@ $(document).ready(function(){
 
 	// item view
 	var LineItemView = Backbone.View.extend({
-		template: _.template("<li><img src='<%= presentation.image%>' /> <div> Product Name: <%= presentation.display%></div> <div><input type='text' value='<%= quantity%>' /></div> <%= subtotal.presentation%><div><%= total.presentation%></div><span>Remove</span></li>"),
+		template: _.template("<li class='fs_line_item'><img src='<%= presentation.image%>' /> <div class='fs_line_item_prod_name'> Product Name: <%= presentation.display%></div> <div class='fs_line_item_qty'><input type='text' value='<%= quantity%>' /></div> <div class='fs_line_item_subtotal'><%= subtotal.presentation%></div><div class='fs_line_item_total'><%= total.presentation%></div><span>Remove</span></li>"),
 		render: function() {
 			this.$el.html(this.template(this.model.attributes));
 			return this;
+		},
+		initialize: function() {
+			var lineItemView = this;
+			this.$el.find("input").on("change", function(){
+				lineItemView.model.set("quantity", this.value);
+			})
 		}
 	});
 	// list view
 	var LineItemListView = Backbone.View.extend({
-		template: _.template("<div><ul></ul><div id='cartTotal'><span>Tax: <%= taxRate %> </span><span>Total: <%= total %> </span> </div></div>"),
+		template: _.template("<div><ul></ul><div id='cartTotal'><span>Tax: <%= taxRate %> </span><span class='fs_cart_total'>Total: <%= total %> </span> </div></div>"),
 		render: function() {
+			debugger;
+			var data = {
+				taxRate : this.collection.taxRate,
+				total : this.collection.total
+			};
+			this.$el.html(this.template(data));
 			this.collection.forEach(this.addOne, this);
 			return this;
 		},
+		initialize: function() {
+			// this.total = this.quantity * this.subtotal.value;
+			// this.updateTotal();
+			this.collection.on("change", this.render); 
+		},		
 		addOne: function(lineItem){
 			var lineItemView = new LineItemView( {model: lineItem});
-			this.$el.append(lineItemView.render().el);
+			this.$el.find("ul").append(lineItemView.render().el);
 		}
 	});
 
@@ -114,8 +152,9 @@ $(document).ready(function(){
 	var itemList = new LineItemList();
 	var itemListView = new LineItemListView({collection: itemList});
 
-	// popupate with data (clears the collection to initialize)
+	// populate with data (clears the collection to initialize)
 	itemList.reset(items);
+	itemList.initialize();
 
 	// RENDER
 	// inject view's render output into the cart container

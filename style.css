@@ -89,6 +89,19 @@ a, a:hover, a:visited {
  * Override
  */
 
+// New js cart css
+
+
+li.fs_line_item {
+	display: inline-block;	
+}
+
+li.fs_line_item > div, li.fs_line_item > img {
+	display: inline-block;
+}
+
+
+
 .store-order-action-list li {
 	white-space: normal !important; /* france length */
 }
