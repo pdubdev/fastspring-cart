@@ -30,7 +30,7 @@ var cartObj =
 			"presentation": {
 				"description": "orem ipsum dolor sit amet, consectetuer adipiscing elit. Sed eu ligula. Sed interdum, odio ut consectetuer imperdiet, elit velit tempor nisi, sit amet accumsan nulla velit ut tortor. Duis pretium ligula non orci interdum accumsan. Vestibulum varius lectus vel nisi. Pellentesque cursus, magna eu euismod vestibulum, nisl nulla pellentesque enim, et dictum dui risus at nibh. Nam id sapien nec pede sagittis euismod.",
 				"display": "ABC Book Organizer",
-				"image": "//dnkiumg6lohf.cloudfront.net/test/image/58ffd041-28e9-4604-914d-acc8e5efacc6",
+				"image": "http://dnkiumg6lohf.cloudfront.net/test/image/58ffd041-28e9-4604-914d-acc8e5efacc6",
 				"summary": ""
 			},
 			"productName": "ABC Book Organizer",
@@ -43,7 +43,29 @@ var cartObj =
 				"presentation": "$29.95",
 				"value": 29.95
 			}
-		}
+		},
+		{
+			"discount": {
+				"presentation": "$0.00",
+				"value": 0.0
+			},
+			"presentation": {
+				"description": "This is different ipsum dolor sit amet, consectetuer adipiscing elit. Sed eu ligula. Sed interdum, odio ut consectetuer imperdiet, elit velit tempor nisi, sit amet accumsan nulla velit ut tortor. Duis pretium ligula non orci interdum accumsan. Vestibulum varius lectus vel nisi. Pellentesque cursus, magna eu euismod vestibulum, nisl nulla pellentesque enim, et dictum dui risus at nibh. Nam id sapien nec pede sagittis euismod.",
+				"display": "XYZ Book Organizer",
+				"image": "http://dnkiumg6lohf.cloudfront.net/test/image/58ffd041-28e9-4604-914d-acc8e5efacc6",
+				"summary": ""
+			},
+			"productName": "XYZ Book Organizer",
+			"quantity": 1,
+			"subtotal": {
+				"presentation": "$39.95",
+				"value": 39.95
+			},
+			"total": {
+				"presentation": "$39.95",
+				"value": 39.95
+			}
+		}		
 		],
 		"taxRate": 0.0
 	}
@@ -55,7 +77,13 @@ $(document).ready(function(){
 
 	// MODELS
 	var LineItem = Backbone.Model.extend({});
-	var LineItemList = Backbone.Collection.extend({model: LineItem});
+	var LineItemList = Backbone.Collection.extend({
+		model: LineItem,
+		initialize: function() {
+			this.total = 0;
+			
+		}
+	});
 
 	// =========
 	// = VIEWS =
@@ -63,7 +91,7 @@ $(document).ready(function(){
 
 	// item view
 	var LineItemView = Backbone.View.extend({
-		template: _.template("<li>Product Name: <%= productName%></li>"),
+		template: _.template("<li><img src='<%= presentation.image%>' /> <div> Product Name: <%= presentation.display%></div> <div><input type='text' value='<%= quantity%>' /></div> <%= subtotal.presentation%><div><%= total.presentation%></div><span>Remove</span></li>"),
 		render: function() {
 			this.$el.html(this.template(this.model.attributes));
 			return this;
@@ -71,7 +99,7 @@ $(document).ready(function(){
 	});
 	// list view
 	var LineItemListView = Backbone.View.extend({
-		template: _.template("<ul></ul>"),
+		template: _.template("<div><ul></ul><div id='cartTotal'><span>Tax: <%= taxRate %> </span><span>Total: <%= total %> </span> </div></div>"),
 		render: function() {
 			this.collection.forEach(this.addOne, this);
 			return this;
