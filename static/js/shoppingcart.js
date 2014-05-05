@@ -75,15 +75,16 @@ var cartObj =
 $(document).ready(function(){
 	var items = cartObj.order.items;
 
-	// MODELS
+	// == MODELS ==
 	var LineItem = Backbone.Model.extend({
 		initialize: function() {
 			// this.total = this.quantity * this.subtotal.value;
-			this.updateTotal();
-			this.on("change:quantity", this.updateTotal);
+			// this.updateTotal();
+			// this.on("change:quantity", this.updateTotal);
 		},
 		updateTotal: function() {
-			this.total = this.quantity * this.subtotal.value;
+			//this.total = this.quantity * this.subtotal.value;
+			this.set({quantity: this.quantity});
 		}
 	});
 	var LineItemList = Backbone.Collection.extend({
@@ -96,7 +97,7 @@ $(document).ready(function(){
 		updateTotal: function() {
 			var total = 0;
 			this.forEach(function(item){
-				debugger;
+				// debugger;
 				var quantity = item.attributes.quantity;
 				var price = item.attributes.subtotal.value;
 				total = total + (quantity * price);
@@ -106,9 +107,8 @@ $(document).ready(function(){
 
 	});
 
-	// =========
+
 	// = VIEWS =
-	// =========
 
 	// item view
 	var LineItemView = Backbone.View.extend({
@@ -118,13 +118,20 @@ $(document).ready(function(){
 			return this;
 		},
 		events:{
-			"change input": function(event){
+			"change input": function(event) {
 				var input = event.target;
 				this.model.set("quantity", input.value);
+			},
+
+			// remove from dom on click
+			"click span": function(event) {
+				this.$el.remove();
 			}
+
 		},
 		initialize: function() {
 		}
+
 	});
 	// list view
 	var LineItemListView = Backbone.View.extend({
@@ -156,6 +163,8 @@ $(document).ready(function(){
 	// populate with data (clears the collection to initialize)
 	itemList.reset(items);
 	itemList.initialize();
+	console.log(itemList.toJSON());
+	// itemList.save(items);
 
 	// RENDER
 	// inject view's render output into the cart container
